@@ -1,20 +1,28 @@
-version: "3.9"
 services:
   pocketbase:
-    image: ghcr.io/pocketbase/pocketbase:latest
-    command: ["serve", "--http=0.0.0.0:8090", "--dir=/pb_data"]
+    build:
+      context: .
+      dockerfile: Dockerfile.pb
+      # Optionally pin a version on build:
+      # args:
+      #   PB_VERSION: "0.31.0"
+    command: ["/pb/pocketbase", "serve", "--http=0.0.0.0:8080", "--dir=/pb/pb_data"]
     volumes:
-      - pb_data:/pb_data
+      - pb_data:/pb/pb_data
     ports:
-      - "8090:8090"
+      - "8080:8080"
 
   web:
     build:
       context: .
       dockerfile: Dockerfile.web
     environment:
-      VITE_API_BASE: http://localhost:8090
+      # Your Vite app reads this to talk to PocketBase
+      VITE_API_BASE: http://localhost:8080
     ports:
-      - "3000:80"
+      - "3003:80"
+    depends_on:
+      - pocketbase
+
 volumes:
   pb_data:
