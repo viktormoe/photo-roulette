@@ -59,7 +59,7 @@ const Upload = () => {
 
     fetchData();
 
-    // Subscribe to room status changes
+    // Subscribe to room status changes and check if all ready
     const channel = supabase
       .channel("room-status")
       .on(
@@ -77,7 +77,48 @@ const Upload = () => {
           }
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "players",
+          filter: `room_id=eq.${roomId}`,
+        },
+        async () => {
+          // Check if all players are ready
+          await checkAllPlayersReady();
+        }
+      )
       .subscribe();
+
+    const checkAllPlayersReady = async () => {
+      const { data: allPlayers } = await supabase
+        .from("players")
+        .select("is_ready")
+        .eq("room_id", roomId);
+
+      if (allPlayers && allPlayers.length > 0 && allPlayers.every(p => p.is_ready)) {
+        // All ready - host can start
+        const { data: roomData } = await supabase
+          .from("rooms")
+          .select("host_id")
+          .eq("id", roomId)
+          .single();
+
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (roomData && session && roomData.host_id === session.user.id) {
+          // Auto-start game
+          await supabase
+            .from("rooms")
+            .update({ status: "playing" })
+            .eq("id", roomId);
+        }
+      }
+    };
+
+    checkAllPlayersReady();
 
     return () => {
       supabase.removeChannel(channel);
