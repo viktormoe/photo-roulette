@@ -1,0 +1,55 @@
+{
+  "collections": [
+    {
+      "name": "rooms",
+      "type": "base",
+      "schema": [
+        { "name": "code", "type": "text", "required": true, "unique": true },
+        { "name": "host_id", "type": "text", "required": true },
+        { "name": "status", "type": "text", "required": true, "options": { "min": 0, "max": 50 } },
+        { "name": "current_round", "type": "number" }
+      ]
+    },
+    {
+      "name": "players",
+      "type": "base",
+      "schema": [
+        { "name": "room_id", "type": "relation", "options": { "collectionId": "rooms" } },
+        { "name": "user_id", "type": "text", "required": true },
+        { "name": "nickname", "type": "text", "required": true },
+        { "name": "avatar_color", "type": "text", "required": true },
+        { "name": "score", "type": "number", "required": true, "options": { "min": 0 } },
+        { "name": "is_ready", "type": "bool", "required": true }
+      ]
+    },
+    {
+      "name": "photos",
+      "type": "base",
+      "schema": [
+        { "name": "room_id", "type": "relation", "options": { "collectionId": "rooms" } },
+        { "name": "player_id", "type": "relation", "options": { "collectionId": "players" } },
+        { "name": "file", "type": "file", "required": true, "options": { "maxSelect": 1 } }
+      ]
+    },
+    {
+      "name": "rounds",
+      "type": "base",
+      "schema": [
+        { "name": "room_id", "type": "relation", "options": { "collectionId": "rooms" } },
+        { "name": "photo_id", "type": "relation", "options": { "collectionId": "photos" } },
+        { "name": "correct_player_id", "type": "relation", "options": { "collectionId": "players" } },
+        { "name": "round_number", "type": "number", "required": true }
+      ]
+    },
+    {
+      "name": "guesses",
+      "type": "base",
+      "schema": [
+        { "name": "round_id", "type": "relation", "options": { "collectionId": "rounds" } },
+        { "name": "player_id", "type": "relation", "options": { "collectionId": "players" } },
+        { "name": "guessed_player_id", "type": "relation", "options": { "collectionId": "players" } },
+        { "name": "points", "type": "number", "required": true }
+      ]
+    }
+  ]
+}
