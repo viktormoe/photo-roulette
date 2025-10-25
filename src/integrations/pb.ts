@@ -1,7 +1,7 @@
-import PocketBase from 'pocketbase';
-export const pb = new PocketBase(import.meta.env.VITE_API_BASE || 'http://localhost:8090');
+import PocketBase from "pocketbase";
+export const pb = new PocketBase(import.meta.env.VITE_API_BASE || "http://localhost:8080");
 
-// Helper: subscribe to collection changes
-export function subscribe(collection, handler) {
-  return pb.collection(collection).subscribe('*', handler);
+// Realtime helper (optional)
+export function subscribe(collection: string, handler: (e: any) => void) {
+  return pb.collection(collection).subscribe("*", handler);
 }
